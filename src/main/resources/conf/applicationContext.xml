@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd">
+
+<!--这是spring配置文件，用来声明service，dao，工具类等对象-->
+    <context:property-placeholder location="classpath:conf/jdbc.properties"/>
+
+    <!--声明数据源，连接数据库-->
+    <bean id="myDataSource" class="com.alibaba.druid.pool.DruidDataSource"
+    init-method="init" destroy-method="close">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--sqlSessionFactoryBean创建sqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--声明所使用的数据源-->
+        <property name="dataSource" ref="myDataSource"/>
+        <!--声明所加载的.xml文件-->
+        <property name="configLocation" value="classpath:conf/mybatis.xml"/>
+    </bean>
+
+    <!--声明mybatis扫描器，创建dao对象，把那一个包下面的类创建出来-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--使用bean工厂创建dao对象-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <!--创建的dao对象所在的包-->
+        <property name="basePackage" value="com.bjpowernode.dao"/>
+    </bean>
+
+    <!--声明service的注解@Service所在的包名位置-->
+    <!--如果一个类带了@Service注解，将自动注册到Spring容器，
+    不需要再在applicationContext.xml配置文件中定义bean了，
+    类似的还包括@Component、@Repository、@Controller。-->
+    <context:component-scan base-package="com.bjpowernode.service"/>
+
+    <!--事务配置：注解的配置，aspectj的配置，后面加上-->
+</beans>
